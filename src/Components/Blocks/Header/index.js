@@ -28,16 +28,6 @@ export default function Header() {
           >
             Drag'n'drop list
           </Typography>
-          <nav>
-            <Link
-              className={cs.link}
-              color="textPrimary"
-              href="#"
-              variant="button"
-            >
-              Features
-            </Link>
-          </nav>
         </Toolbar>
       </AppBar>
     </>

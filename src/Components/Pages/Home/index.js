@@ -1,73 +1,60 @@
-import React, { useMemo, useState } from 'react'
+import React from 'react'
 
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
-
-import Row from 'Components/Blocks/Row'
-import TableHeader from 'Components/Blocks/TableHeader'
-import Header from 'Components/Blocks/Header'
-
-import cs from './styles.scss'
-
-import { columns } from './config'
-import { useDataContext } from 'Context/Data'
+import Pagination from '@material-ui/lab/Pagination'
 import Paper from '@material-ui/core/Paper'
 
+import Header from 'Components/Blocks/Header'
+import ListItem from 'Components/Blocks/ListItem'
+
+import { useDataContext } from 'Context/Data'
+
+import styles from './styles.scss'
+
 export default function() {
-  const { items, isLoading } = useDataContext()
+  const {
+    items,
+    isLoading,
+    moveItems,
+    page,
+    changePage,
+    updateItem
+  } = useDataContext()
 
-  function onDragStart(start, provided) {
-    provided.announce(
-      `You have lifted the task in position ${start.source.index + 1}`
-    )
-  }
-  function onDragUpdate(update, provided) {
-    const message = update.description
-      ? `You have moved the task to position ${update.destination.index + 1}`
-      : `You are currently not over a droppable area`
-
-    provided.announce(message)
-  }
-  function onDragEnd(result, provided) {
-    const message = result.destination
-      ? `You have moved the task from position ${result.source.index +
-          1} to ${result.destination.index + 1}`
-      : `The task has been returned to its starting position of ${result.source
-          .index + 1}`
-
-    provided.announce(message)
+  function onDragEnd({ source, destination }, provided) {
+    moveItems(source.index, destination.index)
   }
 
   return (
     <>
       <Header />
-      <Paper className={cs.main}>
-        <DragDropContext
-          onDragEnd={onDragEnd}
-          onDragStart={onDragStart}
-          onDragUpdate={onDragUpdate}
-        >
-          <table className={cs.table}>
-            <TableHeader columns={columns} />
-            <Droppable droppableId="table" isDropDisabled={isLoading}>
-              {(provided, snapshot) => (
-                <tbody {...provided.droppableProps} ref={provided.innerRef}>
-                  {items.map((e, i) => (
-                    <Row
-                      columns={columns}
-                      data={e}
-                      index={i}
-                      key={e.name ?? e.key}
-                    />
-                  ))}
-                  {provided.placeholder}
-                </tbody>
-              )}
-            </Droppable>
-            <Footer>
-
-            </Footer>
-          </table>
+      <Paper className={styles.main}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="table" isDropDisabled={isLoading}>
+            {(provided, snapshot) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                {items.map((e, i) => (
+                  <ListItem
+                    data={e}
+                    index={i}
+                    key={e.title ?? e.key}
+                    updateItem={updateItem}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </DragDropContext>
+        <div className={styles.footer}>
+          <Pagination
+            count={10}
+            disabled={isLoading}
+            page={page + 1}
+            shape="rounded"
+            onChange={changePage}
+          />
+        </div>
       </Paper>
     </>
   )

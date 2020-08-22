@@ -21,12 +21,12 @@ export default function DataProvider({ children }) {
 
   const [isLoading, setLoading] = useState(!localStorage.getItem('data'))
 
-  useEffect(() => {
-    function saveData(data) {
-      localStorage.setItem('data', JSON.stringify(data))
-      setData(data)
-    }
+  function saveData(data) {
+    localStorage.setItem('data', JSON.stringify(data))
+    setData(data)
+  }
 
+  useEffect(() => {
     if (data.isEmpty()) {
       getData()
         .then(e => {
@@ -41,13 +41,35 @@ export default function DataProvider({ children }) {
     }
   }, [])
 
+  function moveItems(index, destination) {
+    const itemsCount = page * 10
+    const result = Array.from(data)
+    const [removed] = result.splice(itemsCount + index, 1)
+    result.splice(itemsCount + destination, 0, removed)
+    saveData(result)
+  }
+
+  function updateItem(event, index) {
+    const itemsCount = page * 10
+
+    data[itemsCount + index].title = event.target.value
+    localStorage.setItem('data', JSON.stringify(data))
+  }
+
+  function changePage(_, newPage) {
+    setPage(newPage - 1)
+  }
+
   const items = isLoading ? mockData : data.slice(page * 10, page * 10 + 10)
 
   const value = {
     items,
     isLoading,
-    setPage,
-    page
+    changePage,
+    page,
+    moveItems,
+    updateItem
   }
+
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }
