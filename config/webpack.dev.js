@@ -32,7 +32,7 @@ module.exports = {
     ])
   },
   performance: {
-    hints: 'warning',
+    hints: false,
     maxAssetSize: 450000,
     maxEntrypointSize: 8500000,
     assetFilter: assetFilename => {
