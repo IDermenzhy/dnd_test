@@ -2,10 +2,11 @@ import React, { memo, useState } from 'react'
 import { Draggable } from 'react-beautiful-dnd'
 import cs from 'classnames'
 import Skeleton from '@material-ui/lab/Skeleton'
+import Button from '@material-ui/core/Button'
 
 import styles from './styles.scss'
 
-function ListItem({ data, index, updateItem }) {
+function ListItem({ data, index, updateItem, deleteItem }) {
   const [editable, setEditable] = useState(false)
 
   function onDoubleClick() {
@@ -44,6 +45,14 @@ function ListItem({ data, index, updateItem }) {
             ) : (
               <span onDoubleClick={onDoubleClick}>{data.title}</span>
             )}
+            <Button
+              color="secondary"
+              variant="contained"
+              /* eslint-disable-next-line react/jsx-no-bind */
+              onClick={() => deleteItem(index)}
+            >
+              Delete
+            </Button>
           </div>
         )
       }}

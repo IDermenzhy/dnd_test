@@ -14,6 +14,8 @@
   border-bottom: 1px solid rgba(224, 224, 224, 1);
   letter-spacing: 0.01071em;
   vertical-align: inherit;
+  display: flex;
+  justify-content: space-between;
 }
 
 .input {

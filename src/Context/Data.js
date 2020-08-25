@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { getData } from 'Helpers/api'
-import { generateData } from 'Helpers/text_generator'
+import { generateData, generateItem } from 'Helpers/text_generator'
 
 const DataContext = createContext()
 
@@ -51,9 +51,24 @@ export default function DataProvider({ children }) {
 
   function updateItem(event, index) {
     const itemsCount = page * 10
-
     data[itemsCount + index].title = event.target.value
     localStorage.setItem('data', JSON.stringify(data))
+  }
+
+  function deleteItem(index) {
+    const itemsCount = page * 10
+    const result = Array.from(data)
+    result.splice(itemsCount + index, 1)
+
+    saveData(result)
+  }
+
+  function createItem(text) {
+    const itemsCount = page * 10
+    const result = Array.from(data)
+    const newItem = generateItem(text)
+    result.splice(itemsCount, 0, newItem)
+    saveData(result)
   }
 
   function changePage(_, newPage) {
@@ -68,7 +83,10 @@ export default function DataProvider({ children }) {
     changePage,
     page,
     moveItems,
-    updateItem
+    updateItem,
+    deleteItem,
+    createItem,
+    pages: Math.ceil(data.length / 10)
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

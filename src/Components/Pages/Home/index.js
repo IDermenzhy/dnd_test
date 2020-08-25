@@ -18,7 +18,9 @@ export default function() {
     moveItems,
     page,
     changePage,
-    updateItem
+    updateItem,
+    deleteItem,
+    pages
   } = useDataContext()
 
   function onDragEnd({ source, destination }, provided) {
@@ -36,6 +38,7 @@ export default function() {
                 {items.map((e, i) => (
                   <ListItem
                     data={e}
+                    deleteItem={deleteItem}
                     index={i}
                     key={e.title ?? e.key}
                     updateItem={updateItem}
@@ -48,7 +51,7 @@ export default function() {
         </DragDropContext>
         <div className={styles.footer}>
           <Pagination
-            count={10}
+            count={pages}
             disabled={isLoading}
             page={page + 1}
             shape="rounded"
