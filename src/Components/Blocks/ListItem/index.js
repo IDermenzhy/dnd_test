@@ -7,10 +7,24 @@ import Button from '@material-ui/core/Button'
 import styles from './styles.scss'
 
 function ListItem({ data, index, updateItem, deleteItem }) {
-  const [editable, setEditable] = useState(() => false)
+  const [editable, setEditable] = useState(false)
+  const [text, setText] = useState(data.title)
 
   function onDoubleClick() {
+    if (editable) {
+      updateItem(text, index)
+    }
     setEditable(x => !x)
+  }
+
+  function onSaveData(e) {
+    e.preventDefault()
+    setEditable(false)
+    updateItem(text, index)
+  }
+
+  function onChange(e) {
+    setText(e.target.value)
   }
 
   return (
@@ -41,15 +55,17 @@ function ListItem({ data, index, updateItem, deleteItem }) {
             style={provided.draggableProps.style}
           >
             {editable ? (
-              <input
-                autoFocus={true}
-                className={styles.input}
-                defaultValue={data.title}
-                type="text"
-                onBlurCapture={onDoubleClick}
-                // eslint-disable-next-line react/jsx-no-bind
-                onChange={e => updateItem(e, index)}
-              />
+              <form onSubmit={onSaveData} className={styles.form}>
+                <input
+                  autoFocus={true}
+                  className={styles.input}
+                  type="text"
+                  value={text}
+                  onBlurCapture={onDoubleClick}
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onChange={onChange}
+                />
+              </form>
             ) : (
               <span onDoubleClick={onDoubleClick}>{data.title}</span>
             )}

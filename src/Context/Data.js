@@ -77,12 +77,12 @@ export default function DataProvider({ children }) {
     })
   }
 
-  function updateItem(event, index) {
+  function updateItem(text, index) {
     dispatch({
       type: UPDATE_ITEM,
       payload: {
         index,
-        text: event.target.value
+        text
       }
     })
   }
