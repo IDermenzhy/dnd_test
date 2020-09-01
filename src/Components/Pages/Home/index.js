@@ -40,7 +40,7 @@ export default function() {
                     data={e}
                     deleteItem={deleteItem}
                     index={i}
-                    key={e.title ?? e.key}
+                    key={e.title ?? e.toString()}
                     updateItem={updateItem}
                   />
                 ))}

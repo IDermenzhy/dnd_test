@@ -1,8 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useState
+} from 'react'
 import { getData } from 'Helpers/api'
 import { generateData, generateItem } from 'Helpers/text_generator'
+import DataReducer from 'Reducer/data'
+import {
+  ADD_DATA,
+  ADD_ITEM,
+  CHANGE_PAGE,
+  MOVE_ITEM,
+  REMOVE_ITEM,
+  UPDATE_ITEM
+} from '../Constants/action_types'
 
-const DataContext = createContext()
+export const DataContext = createContext()
 
 export const useDataContext = () => useContext(DataContext)
 
@@ -11,82 +26,102 @@ Array.prototype.isEmpty = function() {
   return this.length === 0
 }
 
+const initialState = {
+  data: [],
+  page: 0
+}
+
+function init() {
+  return {
+    page: 0,
+    data: JSON.parse(localStorage.getItem('data')) ?? []
+  }
+}
+
 const mockData = Array.from(Array(10).keys())
 
 export default function DataProvider({ children }) {
-  const [data, setData] = useState(
-    JSON.parse(localStorage.getItem('data')) ?? []
-  )
-  const [page, setPage] = useState(0)
+  const [state, dispatch] = useReducer(DataReducer, initialState, init)
 
   const [isLoading, setLoading] = useState(!localStorage.getItem('data'))
 
-  function saveData(data) {
-    localStorage.setItem('data', JSON.stringify(data))
-    setData(data)
-  }
-
   useEffect(() => {
-    if (data.isEmpty()) {
-      getData()
-        .then(e => {
-          saveData(e)
+    if (state.data.isEmpty()) {
+      async function fetchData() {
+        let data
+        try {
+          data = await getData()
+        } catch (e) {
+          data = generateData()
+        }
+        return data
+      }
+
+      fetchData().then(e => {
+        setLoading(false)
+        dispatch({
+          type: ADD_DATA,
+          payload: e
         })
-        .catch(e => {
-          saveData(generateData())
-        })
-        .finally(() => {
-          setLoading(false)
-        })
+      })
     }
   }, [])
 
   function moveItems(index, destination) {
-    const itemsCount = page * 10
-    const result = Array.from(data)
-    const [removed] = result.splice(itemsCount + index, 1)
-    result.splice(itemsCount + destination, 0, removed)
-    saveData(result)
+    dispatch({
+      type: MOVE_ITEM,
+      payload: {
+        index,
+        destination
+      }
+    })
   }
 
   function updateItem(event, index) {
-    const itemsCount = page * 10
-    data[itemsCount + index].title = event.target.value
-    localStorage.setItem('data', JSON.stringify(data))
+    dispatch({
+      type: UPDATE_ITEM,
+      payload: {
+        index,
+        text: event.target.value
+      }
+    })
   }
 
   function deleteItem(index) {
-    const itemsCount = page * 10
-    const result = Array.from(data)
-    result.splice(itemsCount + index, 1)
-
-    saveData(result)
+    dispatch({
+      type: REMOVE_ITEM,
+      payload: { index }
+    })
   }
 
   function createItem(text) {
-    const itemsCount = page * 10
-    const result = Array.from(data)
-    const newItem = generateItem(text)
-    result.splice(itemsCount, 0, newItem)
-    saveData(result)
+    dispatch({
+      type: ADD_ITEM,
+      payload: { text }
+    })
   }
 
   function changePage(_, newPage) {
-    setPage(newPage - 1)
+    dispatch({
+      type: CHANGE_PAGE,
+      payload: { newPage }
+    })
   }
 
-  const items = isLoading ? mockData : data.slice(page * 10, page * 10 + 10)
+  const items = isLoading
+    ? mockData
+    : state.data.slice(state.page * 10, state.page * 10 + 10)
 
   const value = {
     items,
     isLoading,
     changePage,
-    page,
+    page: state.page,
     moveItems,
     updateItem,
     deleteItem,
     createItem,
-    pages: Math.ceil(data.length / 10)
+    pages: Math.ceil(state.data.length / 10)
   }
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

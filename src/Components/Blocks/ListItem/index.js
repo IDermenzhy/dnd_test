@@ -7,21 +7,29 @@ import Button from '@material-ui/core/Button'
 import styles from './styles.scss'
 
 function ListItem({ data, index, updateItem, deleteItem }) {
-  const [editable, setEditable] = useState(false)
+  const [editable, setEditable] = useState(() => false)
 
   function onDoubleClick() {
     setEditable(x => !x)
   }
 
   return (
-    <Draggable draggableId={data.title ?? data.key} index={index}>
+    <Draggable draggableId={data.title ?? data.toString()} index={index}>
       {(provided, snapshot) => {
         const className = cs(
           snapshot.isDragging && styles.draggable,
           styles.item
         )
         if (!data.title) {
-          return <Skeleton animation="wave" variant="text" />
+          return (
+            <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+            >
+              <Skeleton animation="wave" variant="text" />
+            </div>
+          )
         }
 
         return (
@@ -61,6 +69,5 @@ function ListItem({ data, index, updateItem, deleteItem }) {
 }
 
 export default memo(ListItem, (prev, next) => {
-  // console.log(prev, next)
   return prev.index === next.index
 })
